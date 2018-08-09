@@ -92,6 +92,11 @@ module DiscourseApi
       def delete_user(user_id, delete_posts = false)
         delete("/admin/users/#{user_id}.json?delete_posts=#{delete_posts}")
       end
+
+      def email(user_id)
+        response = get("/users/#{user_id}/emails.json")
+        response[:body]
+      end
     end
   end
 end
