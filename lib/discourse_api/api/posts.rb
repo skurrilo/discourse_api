@@ -1,22 +1,23 @@
+# frozen_string_literal: true
 module DiscourseApi
   module API
     module Posts
       def create_post(args)
         args = API.params(args)
-                  .required(:topic_id, :raw)
-                  .optional(:created_at, :api_username)
+          .required(:topic_id, :raw)
+          .optional(:created_at, :api_username)
         post("/posts", args)
       end
 
       def create_post_action(args)
         args = API.params(args)
-                   .required(:id, :post_action_type_id)
+          .required(:id, :post_action_type_id)
         post("/post_actions", args.to_h.merge(flag_topic: false))
       end
 
       def get_post(id, args = {})
         args = API.params(args)
-                  .optional(:version)
+          .optional(:version)
         response = get("/posts/#{id}.json", args)
         response[:body]
       end
@@ -26,7 +27,7 @@ module DiscourseApi
       end
 
       def edit_post(id, raw)
-        put("/posts/#{id}", post: {raw: raw})
+        put("/posts/#{id}", post: { raw: raw })
       end
 
       def delete_post(id)
@@ -38,7 +39,7 @@ module DiscourseApi
       end
 
       def post_action_users(post_id, post_action_type_id)
-        response = get("/post_action_users.json", {id: post_id, post_action_type_id: post_action_type_id})
+        response = get("/post_action_users.json", id: post_id, post_action_type_id: post_action_type_id)
         response[:body]
       end
     end

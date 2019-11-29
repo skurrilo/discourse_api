@@ -1,5 +1,12 @@
+# frozen_string_literal: true
 module DiscourseApi
   class DiscourseError < StandardError
+    attr_reader :response
+
+    def initialize(message, response = nil)
+      super(message)
+      @response = response
+    end
   end
 
   class Error < DiscourseError
@@ -9,7 +16,7 @@ module DiscourseApi
     #
     # @param exception [Exception, String]
     # @return [DiscourseApi::Error]
-    def initialize(exception=$!)
+    def initialize(exception = $!)
       @wrapped_exception = exception
       exception.respond_to?(:message) ? super(exception.message) : super(exception.to_s)
     end

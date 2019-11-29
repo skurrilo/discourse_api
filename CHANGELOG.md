@@ -2,6 +2,88 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.38.0] - 2019-10-18
+### Added
+- Allow setting locale in SingleSignOn
+- Optional param to group memebrs to include owners as well as members
+
+## [0.37.0] - 2019-09-23
+### Added
+- user-badges endpoint for full badges list
+- expanded list of allowed messages
+- grant/revoke moderation
+
+## [0.36.0] - 2019-07-18
+### Added
+- Added poll methods
+### Fixed
+- Updated create topic example
+- Fixed capialization for header auth keys
+
+## [0.35.0] - 2019-05-15
+### Added
+- Added `custom_fields` param to create/update category
+- Added `frozen_string_literal: true` to all the files
+- Added rubocop and all the changes that went along with it
+### Fixed
+- Allow `api_username` to be changed for an initialized client
+- Update many of the `/users` routes to use the `/u` route
+### Changed
+- Changed `update_trust_level` to follow consistent method param syntax where
+  you specify the id first followed by params
+
+## [0.34.0] - 2019-04-02
+### Added
+- Header based authentication
+### Removed
+- Query param based authentication
+
+## [0.33.0] - 2019-03-04
+### Added
+- Added a new method to update a users notification level in a category
+
+## [0.32.0] - 2019-02-13
+### Added
+- Added a new method to update a users notification level in a group
+
+## [0.31.0] - 2019-02-07
+### Added
+- Added `deactivate` method
+- Added 201 and 204 as valid POST responses
+
+## [0.30.0] - 2018-12-19
+### Added
+- Add params hash to `list_users`
+
+## [0.29.0] - 2018-12-07
+### Added
+- Add `add_groups` and `remove_groups` to `sync_sso`
+
+## [0.28.2] - 2018-11-26
+### Fixed
+- Updated arguments for suspending a user
+
+## [0.28.1] - 2018-10-26
+### Fixed
+- Fixed non-URI chars in `check_username` method
+
+## [0.28.0] - 2018-10-23
+### Added
+- Added `check_username` method
+
+## [0.27.0] - 2018-09-14
+### Added
+- Added `site_settings_update` method
+
+## [0.26.0] - 2018-09-10
+### Added
+- Added user `user_actions` endpoint so you can retrieve `user_replies` and
+  `user_topics_and_replies`
+
+## [0.25.0] - 2018-08-15
+### Added
+- Added ability to rescue certain error classes and inspect the response object
+
 ## [0.24.0] - 2018-05-30
 ### Added
 - Added support for custom `user_fields` when creating a user

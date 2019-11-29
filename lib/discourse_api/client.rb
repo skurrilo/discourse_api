@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'faraday'
 require 'faraday_middleware'
 require 'json'
@@ -8,6 +9,7 @@ require 'discourse_api/api/search'
 require 'discourse_api/api/sso'
 require 'discourse_api/api/tags'
 require 'discourse_api/api/topics'
+require 'discourse_api/api/polls'
 require 'discourse_api/api/posts'
 require 'discourse_api/api/users'
 require 'discourse_api/api/groups'
@@ -20,6 +22,8 @@ require 'discourse_api/api/api_key'
 require 'discourse_api/api/backups'
 require 'discourse_api/api/dashboard'
 require 'discourse_api/api/uploads'
+require 'discourse_api/api/user_actions'
+require 'discourse_api/api/site_settings'
 
 module DiscourseApi
   class Client
@@ -31,6 +35,7 @@ module DiscourseApi
     include DiscourseApi::API::SSO
     include DiscourseApi::API::Tags
     include DiscourseApi::API::Topics
+    include DiscourseApi::API::Polls
     include DiscourseApi::API::Posts
     include DiscourseApi::API::Users
     include DiscourseApi::API::Groups
@@ -43,6 +48,8 @@ module DiscourseApi
     include DiscourseApi::API::Backups
     include DiscourseApi::API::Dashboard
     include DiscourseApi::API::Uploads
+    include DiscourseApi::API::UserActions
+    include DiscourseApi::API::SiteSettings
 
     def initialize(host, api_key = nil, api_username = nil)
       raise ArgumentError, 'host needs to be defined' if host.nil? || host.empty?
@@ -54,7 +61,7 @@ module DiscourseApi
 
     def api_username=(api_username)
       @api_username = api_username
-      @connection.params['api_username'] = api_username unless @connection.nil?
+      @connection.headers['Api-Username'] = api_username unless @connection.nil?
     end
 
     def connection_options
@@ -71,29 +78,29 @@ module DiscourseApi
       connection_options[:ssl] = options
     end
 
-    def delete(path, params={})
+    def delete(path, params = {})
       request(:delete, path, params)
     end
 
-    def get(path, params={})
+    def get(path, params = {})
       request(:get, path, params)
     end
 
-    def post(path, params={})
+    def post(path, params = {})
       response = request(:post, path, params)
       case response.status
-      when 200
+      when 200, 201, 204
         response.body
       else
         raise DiscourseApi::Error, response.body
       end
     end
 
-    def put(path, params={})
+    def put(path, params = {})
       request(:put, path, params)
     end
 
-    def patch(path, params={})
+    def patch(path, params = {})
       request(:patch, path, params)
     end
 
@@ -113,17 +120,19 @@ module DiscourseApi
         conn.request :url_encoded
         # Parse responses as JSON
         conn.use FaradayMiddleware::ParseJson, content_type: 'application/json'
+        # For HTTP debugging, uncomment
+        # conn.response :logger
         # Use Faraday's default HTTP adapter
         conn.adapter Faraday.default_adapter
         #pass api_key and api_username on every request
         unless api_username.nil?
-          conn.params['api_key'] = api_key
-          conn.params['api_username'] = api_username
+          conn.headers['Api-Key'] = api_key
+          conn.headers['Api-Username'] = api_username
         end
       end
     end
 
-    def request(method, path, params={})
+    def request(method, path, params = {})
       unless Hash === params
         params = params.to_h if params.respond_to? :to_h
       end
@@ -131,20 +140,20 @@ module DiscourseApi
       response = connection.send(method.to_sym, path, params)
       handle_error(response)
       response.env
-    rescue Faraday::Error::ClientError, JSON::ParserError
+    rescue Faraday::ClientError, JSON::ParserError
       raise DiscourseApi::Error
     end
 
     def handle_error(response)
       case response.status
       when 403
-        raise DiscourseApi::UnauthenticatedError.new(response.env[:body])
+        raise DiscourseApi::UnauthenticatedError.new(response.env[:body], response.env)
       when 404, 410
-        raise DiscourseApi::NotFoundError.new(response.env[:body])
+        raise DiscourseApi::NotFoundError.new(response.env[:body], response.env)
       when 422
-        raise DiscourseApi::UnprocessableEntity.new(response.env[:body])
+        raise DiscourseApi::UnprocessableEntity.new(response.env[:body], response.env)
       when 429
-        raise DiscourseApi::TooManyRequests.new(response.env[:body])
+        raise DiscourseApi::TooManyRequests.new(response.env[:body], response.env)
       when 500...600
         raise DiscourseApi::Error.new(response.env[:body])
       end
