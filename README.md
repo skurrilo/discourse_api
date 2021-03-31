@@ -34,7 +34,6 @@ client.ssl(...)                                 #=> specify SSL connection setti
 
 # Topic endpoints
 client.latest_topics                            #=> Gets a list of the latest topics
-client.hot_topics                               #=> Gets a list of hot topics
 client.new_topics                               #=> Gets a list of new topics
 client.topics_by("sam")                         #=> Gets a list of topics created by user "sam"
 client.topic(57)                                #=> Gets the topic with id 57
@@ -52,7 +51,10 @@ client.sync_sso(                                #=> Synchronizes the SSO record
   name: "Test Name",
   username: "test_name",
   email: "name@example.com",
-  external_id: "2"
+  external_id: "2",
+  custom_fields: {
+    field_1: 'potato'
+  }
 )
 
 # Private messages
@@ -79,6 +81,15 @@ end
 ```
 
 Check out [lib/discourse_api/error.rb](lib/discourse_api/error.rb) and [lib/discourse_api/client.rb](lib/discourse_api/client.rb)'s `handle_error` method for the types of errors raised by the API.
+
+If your forum has a basic HTTP authentication enabled, set user and password:
+
+```ruby
+client.basic_auth = {
+  user: "test",
+  password: "secret"
+}
+```
 
 ## Contributing
 

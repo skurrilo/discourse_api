@@ -9,7 +9,7 @@ module DiscourseApi
       def create_topic(args = {})
         args = API.params(args)
           .required(:title, :raw)
-          .optional(:skip_validations, :category, :auto_track, :created_at, :api_username)
+          .optional(:skip_validations, :category, :auto_track, :created_at, :api_username, :tags)
         post("/posts", args.to_h)
       end
 
@@ -29,6 +29,11 @@ module DiscourseApi
         response[:body]['topic_list']['topics']
       end
 
+      def top_topics(params = {})
+        response = get("/top.json", params)
+        response[:body]['topic_list']['topics']
+      end
+
       def new_topics(params = {})
         response = get("/new.json", params)
         response[:body]['topic_list']['topics']
@@ -42,11 +47,17 @@ module DiscourseApi
         put("/t/#{topic_id}.json", topic_id: topic_id, category_id: category_id)
       end
 
+      # TODO: Deprecated. Remove after 20201231
       def change_topic_status(topic_slug, topic_id, params = {})
+        deprecated(__method__, 'update_topic_status')
+        update_topic_status(topic_id, params)
+      end
+
+      def update_topic_status(topic_id, params = {})
         params = API.params(params)
           .required(:status, :enabled)
           .optional(:api_username)
-        put("/t/#{topic_id}/status", params.to_h)
+        put("/t/#{topic_id}/status", params)
       end
 
       def topic(id, params = {})
@@ -71,6 +82,19 @@ module DiscourseApi
         end
         response = get(url.join)
         response[:body]
+      end
+
+      def change_owner(topic_id, params = {})
+        params = API.params(params)
+          .required(:username, :post_ids)
+
+        post("/t/#{topic_id}/change-owner.json", params)
+      end
+
+      def topic_set_user_notification_level(topic_id, params)
+        params = API.params(params)
+          .required(:notification_level)
+        post("/t/#{topic_id}/notifications", params)
       end
     end
   end

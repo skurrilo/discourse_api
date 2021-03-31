@@ -1,11 +1,52 @@
-# Change Log
+# Changelog
 All notable changes to this project will be documented in this file.
-This project adheres to [Semantic Versioning](http://semver.org/).
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.45.0] - 2021-01-15
+### Added
+- Tag configuration in create_category/update_category
+- Topic#change_owner
+- Support passing approved to #create_user
+### Changed
+- API key methods use the latest endpoints
+
+## [0.44.0] - 2020-11-13
+### Fixed
+- Updated `show_tag` method to use new route
+### Removed
+- Support for Ruby 2.3 and 2.4
+
+## [0.43.1] - 2020-11-04
+### Fixed
+- Tagged version 0.43.0 got pushed without commmit due to new master branch
+  protections in github. No, code changes here just making sure tags align with
+  commits.
+
+## [0.43.0] - 2020-11-04
+### Added
+- Add pagination to list groups endpoint
+### Deprecated
+- `change_topic_status` has been deprecated, use `update_topic_status` instead.
+
+## [0.42.0] - 2020-07-09
+### Added
+- Create topics with tags
+
+## [0.41.0] - 2020-06-17
+### Added
+- Add basic auth support
+### Fixed
+- Fix SSO custom field prefixes
+### Removed
+- Obsolete api key endpoints
 
 ## [0.40.0] - 2020-05-07
 ### Fixed
 - Add missing attributes to `sync_sso`
-
 ### Added
 - Add delete category method
 
@@ -27,7 +68,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Allow  more options parameters when creating a category
 - Don't require topic slug when updating topic status
 - Example files now read config.yml file when present for client settings
-
 ### Fixed
 - Issue with `topic_posts` and frozen strings
 - Fixed some topic and category methods
@@ -224,7 +264,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.8.1] - 2016-03-03
 ### Fixed
 - enable use of discourse_api to make unauthenticated requests to discourse
-  endpoints like /categories and /topics 
+  endpoints like /categories and /topics
 
 ## [0.8.0] - 2016-02-28
 ### Added
@@ -279,10 +319,4 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - `client.category_latest_posts("category-slug")` endpoint
 
 ## [0.1.2] - 2014-05-11
-
 - Release
-
-
-
-
-

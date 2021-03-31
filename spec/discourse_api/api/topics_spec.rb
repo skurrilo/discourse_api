@@ -10,7 +10,7 @@ describe DiscourseApi::API::Topics do
     end
 
     it "changes the topic status" do
-      subject.change_topic_status(nil, 57, { status: 'visible', enabled: false })
+      subject.update_topic_status(57, { status: 'visible', enabled: false })
       expect(a_put("#{host}/t/57/status")).to have_been_made
     end
   end
@@ -50,6 +50,29 @@ describe DiscourseApi::API::Topics do
 
     it "can take a hash param" do
       topics = subject.latest_topics({})
+      expect(topics).to be_an Array
+      expect(topics.first).to be_a Hash
+    end
+  end
+
+  describe "#top_topics" do
+    before do
+      stub_get("#{host}/top.json").to_return(body: fixture("top.json"), headers: { content_type: "application/json" })
+    end
+
+    it "requests the correct resource" do
+      subject.top_topics
+      expect(a_get("#{host}/top.json")).to have_been_made
+    end
+
+    it "returns the requested topics" do
+      topics = subject.top_topics
+      expect(topics).to be_an Array
+      expect(topics.first).to be_a Hash
+    end
+
+    it "can take a hash param" do
+      topics = subject.top_topics({})
       expect(topics).to be_an Array
       expect(topics.first).to be_a Hash
     end
@@ -146,6 +169,35 @@ describe DiscourseApi::API::Topics do
       expect(body).to be_a Hash
       expect(body['post_stream']['posts']).to be_an Array
       expect(body['post_stream']['posts'].first).to be_a Hash
+    end
+  end
+
+  describe "#create_topic_with_tags" do
+    before do
+      stub_post("#{host}/posts").to_return(body: fixture("create_topic_with_tags.json"), headers: { content_type: "application/json" })
+    end
+
+    it "makes the post request" do
+      subject.create_topic title: "Sample Topic Title", raw: "Sample topic content body", tags: ["asdf", "fdsa"]
+      expect(a_post("#{host}/posts")).to have_been_made
+    end
+
+    it "returns success" do
+      response = subject.create_topic title: "Sample Topic Title", raw: "Sample topic content body", tags: ["asdf", "fdsa"]
+      expect(response).to be_a Hash
+      expect(response['topic_id']).to eq 21
+    end
+  end
+
+  describe "#topic_set_user_notification_level" do
+    before do
+      stub_post("#{host}/t/1/notifications").to_return(body: fixture("notification_success.json"), headers: { content_type: "application/json" })
+    end
+
+    it "makes the post request" do
+      response = subject.topic_set_user_notification_level(1, notification_level: 3)
+      expect(a_post("#{host}/t/1/notifications").with(body: "notification_level=3")).to have_been_made
+      expect(response['success']).to eq('OK')
     end
   end
 end

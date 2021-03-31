@@ -10,7 +10,8 @@ module DiscourseApi
           .required(:name, :color, :text_color)
           .optional(:slug, :permissions, :auto_close_hours, :auto_close_based_on_last_post, :position, :email_in,
                              :email_in_allow_strangers, :logo_url, :background_url, :allow_badges, :topic_template, :custom_fields, :description,
-                             :reviewable_by_group_name, :show_subcategory_list, :subcategory_list_style)
+                             :reviewable_by_group_name, :show_subcategory_list, :subcategory_list_style,
+                             :allowed_tags, :allowed_tag_groups, :required_tag_group_name)
           .default(parent_category_id: nil)
         response = post("/categories", args)
         response['category']
@@ -22,7 +23,8 @@ module DiscourseApi
           .required(:id, :name, :color, :text_color)
           .optional(:slug, :permissions, :auto_close_hours, :auto_close_based_on_last_post, :position, :email_in,
                              :email_in_allow_strangers, :logo_url, :background_url, :allow_badges, :topic_template, :custom_fields, :description,
-                             :reviewable_by_group_name, :show_subcategory_list, :subcategory_list_style)
+                             :reviewable_by_group_name, :show_subcategory_list, :subcategory_list_style,
+                             :allowed_tags, :allowed_tag_groups, :required_tag_group_name)
           .default(parent_category_id: nil)
         response = put("/categories/#{category_id}", args)
         response['body']['category'] if response['body']
@@ -34,11 +36,24 @@ module DiscourseApi
       end
 
       def categories(params = {})
+        categories_full(params)['category_list']['categories']
+      end
+
+      def categories_full(params = {})
         response = get('/categories.json', params)
-        response[:body]['category_list']['categories']
+        response[:body]
       end
 
       def category_latest_topics(args = {})
+        response = category_latest_topics_full(args)
+        if response['errors']
+          response['errors']
+        else
+          response['topic_list']['topics']
+        end
+      end
+
+      def category_latest_topics_full(args = {})
         params = API.params(args)
           .required(:category_slug)
           .optional(:page).to_h
@@ -47,25 +62,31 @@ module DiscourseApi
           url = "#{url}?page=#{params[:page]}"
         end
         response = get(url)
-        if response[:body]['errors']
-          response[:body]['errors']
-        else
-          response[:body]['topic_list']['topics']
-        end
+        response[:body]
       end
 
       def category_top_topics(category_slug)
-        response = get("/c/#{category_slug}/l/top.json")
-        if response[:body]['errors']
-          response[:body]['errors']
+        response = category_top_topics_full(category_slug)
+        if response['errors']
+          response['errors']
         else
-          response[:body]['topic_list']['topics']
+          response['topic_list']['topics']
         end
       end
 
+      def category_top_topics_full(category_slug)
+        response = get("/c/#{category_slug}/l/top.json")
+        response[:body]
+      end
+
       def category_new_topics(category_slug)
+        response = category_new_topics_full(category_slug)
+        response['topic_list']['topics']
+      end
+
+      def category_new_topics_full(category_slug)
         response = get("/c/#{category_slug}/l/new.json")
-        response[:body]['topic_list']['topics']
+        response[:body]
       end
 
       def category(id)
@@ -73,11 +94,18 @@ module DiscourseApi
         response[:body]['category']
       end
 
+      # TODO: Deprecated. Remove after 20210727
       def category_set_user_notification(args = {})
         category_id = args[:id]
         args = API.params(args)
           .required(:notification_level)
         post("/category/#{category_id}/notifications", args)
+      end
+
+      def category_set_user_notification_level(category_id, params)
+        params = API.params(params)
+          .required(:notification_level)
+        post("/category/#{category_id}/notifications", params)
       end
     end
   end
