@@ -28,6 +28,27 @@ describe DiscourseApi::Client do
     end
   end
 
+  describe "#timeout" do
+    context 'custom timeout' do
+      it "is set to Faraday connection" do
+        expect(subject.send(:connection).options.timeout).to eq(30)
+      end
+    end
+
+    context 'default timeout' do
+      it "is set to Faraday connection" do
+        subject.timeout = 25
+        expect(subject.send(:connection).options.timeout).to eq(25)
+      end
+    end
+
+    it "raises DiscourseApi::Timeout" do
+      stub_get("#{host}/t/1.json").to_timeout
+
+      expect { subject.topic(1) }.to raise_error(DiscourseApi::Timeout)
+    end
+  end
+
   describe "#api_key" do
     it "is publically accessible" do
       subject.api_key = "test_d7fd0429940"

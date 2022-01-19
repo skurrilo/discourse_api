@@ -15,18 +15,18 @@ describe DiscourseApi::API::Topics do
     end
   end
 
-  describe "#invite_user_to_topic" do
+  describe "#invite_to_topic" do
     before do
       stub_post("#{host}/t/12/invite").to_return(body: fixture("topic_invite_user.json"), headers: { content_type: "application/json" })
     end
 
     it "requests the correct resource" do
-      subject.invite_user_to_topic(email: "fake_user@example.com", topic_id: 12)
+      subject.invite_to_topic(12, email: "fake_user@example.com")
       expect(a_post("#{host}/t/12/invite")).to have_been_made
     end
 
     it "returns success" do
-      response = subject.invite_user_to_topic(email: "fake_user@example.com", topic_id: 12)
+      response = subject.invite_to_topic(12, email: "fake_user@example.com")
       expect(response).to be_a Hash
       expect(response['success']).to be_truthy
     end
@@ -170,6 +170,14 @@ describe DiscourseApi::API::Topics do
       expect(body['post_stream']['posts']).to be_an Array
       expect(body['post_stream']['posts'].first).to be_a Hash
     end
+
+    it "can retrieve a topic posts' raw attribute" do
+      body = subject.topic_posts(57, [123], { include_raw: true })
+      expect(body).to be_a Hash
+      expect(body['post_stream']['posts']).to be_an Array
+      expect(body['post_stream']['posts'].first).to be_a Hash
+      expect(body['post_stream']['posts'].first['raw']).to be_an Array
+    end
   end
 
   describe "#create_topic_with_tags" do
@@ -198,6 +206,30 @@ describe DiscourseApi::API::Topics do
       response = subject.topic_set_user_notification_level(1, notification_level: 3)
       expect(a_post("#{host}/t/1/notifications").with(body: "notification_level=3")).to have_been_made
       expect(response['success']).to eq('OK')
+    end
+  end
+
+  describe "#bookmark_topic" do
+    before do
+      stub_put("#{host}/t/1/bookmark.json").to_return(body: "", headers: { content_type: "application/json" })
+    end
+
+    it "makes the put request" do
+      response = subject.bookmark_topic(1)
+      expect(a_put("#{host}/t/1/bookmark.json")).to have_been_made
+      expect(response.body).to eq(nil)
+    end
+  end
+
+  describe "#remove_topic_bookmark" do
+    before do
+      stub_put("#{host}/t/1/remove_bookmarks.json").to_return(body: "", headers: { content_type: "application/json" })
+    end
+
+    it "makes the put request" do
+      response = subject.remove_topic_bookmark(1)
+      expect(a_put("#{host}/t/1/remove_bookmarks.json")).to have_been_made
+      expect(response.body).to eq(nil)
     end
   end
 end

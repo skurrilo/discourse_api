@@ -74,13 +74,22 @@ module DiscourseApi
         delete("/t/#{id}.json")
       end
 
-      def topic_posts(topic_id, post_ids = [])
+      def topic_posts(topic_id, post_ids = [], params = {})
+        params = API.params(params)
+          .optional(:asc,
+            :filter,
+            :include_raw,
+            :include_suggested,
+            :post_number,
+            :username_filters,
+          )
+
         url = ["/t/#{topic_id}/posts.json"]
         if post_ids.count > 0
           url.push('?')
           url.push(post_ids.map { |id| "post_ids[]=#{id}" }.join('&'))
         end
-        response = get(url.join)
+        response = get(url.join, params)
         response[:body]
       end
 
@@ -95,6 +104,14 @@ module DiscourseApi
         params = API.params(params)
           .required(:notification_level)
         post("/t/#{topic_id}/notifications", params)
+      end
+
+      def bookmark_topic(topic_id)
+        put("/t/#{topic_id}/bookmark.json")
+      end
+
+      def remove_topic_bookmark(topic_id)
+        put("/t/#{topic_id}/remove_bookmarks.json")
       end
     end
   end

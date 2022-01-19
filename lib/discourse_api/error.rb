@@ -33,4 +33,7 @@ module DiscourseApi
 
   class TooManyRequests < DiscourseError
   end
+
+  class Timeout < Error
+  end
 end

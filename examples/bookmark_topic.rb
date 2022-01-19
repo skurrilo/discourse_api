@@ -8,11 +8,8 @@ client = DiscourseApi::Client.new(config['host'] || 'http://localhost:3000')
 client.api_key = config['api_key'] || "YOUR_API_KEY"
 client.api_username = config['api_username'] || "YOUR_USERNAME"
 
-# watch an entire category
-client.category_set_user_notification_level(1, notification_level: 3)
+# Bookmark topic
+puts client.bookmark_topic(1418)
 
-# mute a topic
-client.topic_set_user_notification_level(1, notification_level: 0)
-
-# get user notifications
-client.notifications(username: 'discourse')
+# Remove bookmark from topic
+puts client.remove_topic_bookmark(1418)
